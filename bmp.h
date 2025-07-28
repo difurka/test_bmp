@@ -67,9 +67,12 @@ class BMP {
     void Read(const std::string& fname);
     void WriteInTerminal();
     void WriteInFile(const std::string& fname);
-    int32_t GetWidth() const;
-    uint16_t GetBitCount() const;
-    std::vector<uint8_t> GetData();
+    void SetPixel(const Point& p, const BMPColorHeader& colour);
+
+    
+    // int32_t GetWidth() const;
+    // uint16_t GetBitCount() const;
+    // std::vector<uint8_t> GetData();
 };
 
 

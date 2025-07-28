@@ -8,6 +8,8 @@ int main() {
     std::cout << "Enter input BMP file name: ";
     std::getline(std::cin,  input_file_path);
 	BMP bmp(input_file_path);
+    bmp.WriteInTerminal();
+    std::cout << "\n\n\n";
     bmp.DrawCross();
     bmp.WriteInTerminal();
     std::cout << "Enter output BMP file name: ";

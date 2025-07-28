@@ -10,21 +10,21 @@ inline int Sign(int value) {
     return (0 < value) - (value < 0);
 }
 
-inline void SetPixel(BMP& bmp, const Point& p, BMPColorHeader& colour) {
-    auto width = bmp.GetWidth();
-    if (p.x >= (uint32_t)width || p.y >= (uint32_t)width || p.x < 0 || p.y < 0) {
-        throw std::runtime_error("The point is outside the image boundaries!");
-    }
+// inline void SetPixel(BMP& bmp, const Point& p, BMPColorHeader& colour) {
+//     auto width = bmp.GetWidth();
+//     if (p.x >= (uint32_t)width || p.y >= (uint32_t)width || p.x < 0 || p.y < 0) {
+//         throw std::runtime_error("The point is outside the image boundaries!");
+//     }
 
-    uint32_t channels = bmp.GetBitCount() / 8;
-    auto data = bmp.GetData();
-    data[channels * (p.y * width + p.x) + 0] = colour.blue_mask;
-    data[channels * (p.y * width + p.x) + 1] = colour.green_mask;
-    data[channels * (p.y * width + p.x) + 2] = colour.red_mask;
-    if (channels == 4) {
-        data[channels * (p.y * width + p.x) + 3] = colour.alpha_mask;
-    }
-}
+//     uint32_t channels = bmp.GetBitCount() / 8;
+//     auto data = bmp.GetData();
+//     bmp.GetData()[channels * (p.y * width + p.x) + 0] = colour.blue_mask;
+//     bmp.GetData()[channels * (p.y * width + p.x) + 1] = colour.green_mask;
+//     bmp.GetData()[channels * (p.y * width + p.x) + 2] = colour.red_mask;
+//     if (channels == 4) {
+//         bmp.GetData()[channels * (p.y * width + p.x) + 3] = colour.alpha_mask;
+//     }
+// }
 
 
 /**
@@ -45,7 +45,7 @@ inline void DrawSteepLine(BMP& bmp, Point& from, Point& to, BMPColorHeader& colo
     int error = delta_err / 2;
 
     for (Point p = from; p.y <= to.y; ++p.y) {
-        SetPixel(bmp, {p.x, p.y}, color);
+        bmp.SetPixel({p.x, p.y}, color);
         error += delta_err;
 
         if (error >= error_threshold) {
@@ -73,7 +73,7 @@ inline void DrawSlopeLine(BMP& bmp, Point& from, Point& to, BMPColorHeader& colo
     int error = delta_err / 2;
 
     for (Point p = from; p.x <= to.x; ++p.x) {
-        SetPixel(bmp, {p.x, p.y}, color);
+        bmp.SetPixel({p.x, p.y}, color);
         error += delta_err;
 
         if (error >= error_threshold) {

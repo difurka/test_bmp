@@ -8,8 +8,8 @@
 #include "bmp.h"
 #include "drawer.h"
 
-constexpr static char WHITE = '#';
-constexpr static char BLACK = ' ';
+constexpr static char WHITE = ' ';
+constexpr static char BLACK = '#';
 
 
 
@@ -19,7 +19,7 @@ constexpr static char BLACK = ' ';
     
 
     void BMP::DrawCross() {
-        BMPColorHeader cross_colour = {255, 255, 255};
+        BMPColorHeader cross_colour = {0,0,0}; //{255, 255, 255};
         Point from = {0,0};
         Point to = {bmp_info_header_.width-1, bmp_info_header_.height-1};
         Point from1 = {0,bmp_info_header_.height-1};
@@ -94,13 +94,9 @@ constexpr static char BLACK = ' ';
 
     void BMP::WriteInTerminal() {
 
-        uint32_t channels = GetBitCount() / 8;
-
-
+        uint32_t channels = bmp_info_header_.bit_count / 8;
         for (int y = 0; y < bmp_info_header_.height; ++y) {
             for (int x = 0; x < bmp_info_header_.width; ++x) {
-
-                
                 auto blue =  data_[channels * (y * bmp_info_header_.width + x) + 0];
                 auto green = data_[channels * (y * bmp_info_header_.width + x) + 1];
                 auto red = data_[channels * (y * bmp_info_header_.width + x) + 2];
@@ -181,14 +177,30 @@ constexpr static char BLACK = ' ';
         }
     }
 
-    int32_t BMP::GetWidth() const {
-        return bmp_info_header_.width;
+    // int32_t BMP::GetWidth() const {
+    //     return bmp_info_header_.width;
+    // }
+
+    // uint16_t BMP::GetBitCount() const {
+    //     return bmp_info_header_.bit_count;
+    // }
+
+    // std::vector<uint8_t> BMP::GetData() {
+    //     return data_;
+    // }
+
+    void BMP::SetPixel(const Point& p, const BMPColorHeader& colour) {
+    auto width = bmp_info_header_.width;
+    if (p.x >= (uint32_t)width || p.y >= (uint32_t)width || p.x < 0 || p.y < 0) {
+        throw std::runtime_error("The point is outside the image boundaries!");
     }
 
-    uint16_t BMP::GetBitCount() const {
-        return bmp_info_header_.bit_count;
+    uint32_t channels = bmp_info_header_.bit_count / 8;
+    data_[channels * (p.y * width + p.x) + 0] = colour.blue_mask;
+    data_[channels * (p.y * width + p.x) + 1] = colour.green_mask;
+    data_[channels * (p.y * width + p.x) + 2] = colour.red_mask;
+    if (channels == 4) {
+        data_[channels * (p.y * width + p.x) + 3] = colour.alpha_mask;
     }
+}
 
-    std::vector<uint8_t> BMP::GetData() {
-        return data_;
-    }
