@@ -7,8 +7,8 @@
 #include <string>
 
 struct Point {
-    int x = 0;
-    int y = 0;
+    uint32_t x = 0;
+    uint32_t y = 0;
 };
 
 
