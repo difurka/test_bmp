@@ -1,22 +1,16 @@
 #pragma once
 
 #include <cstdlib>
+#include <stdexcept>
+#include "bmp.h"
 
-// #include "bmp.h"
-class BMP;
-struct BMPInfoHeader;
-
-struct Point {
-    int x = 0;
-    int y = 0;
-};
-
+namespace detail {
 
 inline int Sign(int value) {
     return (0 < value) - (value < 0);
 }
 
-inline void SetPixel(BMP& bmp, Point p, BMPColorHeader colour) {
+inline void SetPixel(BMP& bmp, const Point& p, BMPColorHeader& colour) {
     auto width = bmp.GetWidth();
     if (p.x >= (uint32_t)width || p.y >= (uint32_t)width || p.x < 0 || p.y < 0) {
         throw std::runtime_error("The point is outside the image boundaries!");
@@ -34,53 +28,43 @@ inline void SetPixel(BMP& bmp, Point p, BMPColorHeader colour) {
 
 
 /**
- * Рисует крутой отрезок (для которого |to.y - from.x| >= |to.x - from.x|).
+ * Draw steep line (for case |to.y - from.y| >= |to.x - from.x|).
  */
-inline void DrawSteepLine(BMP& bmp, Point from, Point to, BMPColorHeader color) {
+inline void DrawSteepLine(BMP& bmp, Point& from, Point& to, BMPColorHeader& color) {
     const int delta_x = std::abs(to.x - from.x);
     const int delta_y = std::abs(to.y - from.y);
 
-    // assert(delta_y >= delta_x);
-
-    if (from.y > to.y) {  // Крутые отрезки рисуем сверху вниз.
+    if (from.y > to.y) {
         std::swap(from, to);
     }
 
-    const int step_x = Sign(to.x - from.x);  // Шаг по оси X (-1, 0 или 1).
-    const int error_threshold = delta_y + 1;  // Порог ошибки вычисления координаты X.
-    const int delta_err = delta_x + 1;  // Шаг накопления ошибки.
+    const int step_x = Sign(to.x - from.x);
+    const int error_threshold = delta_y + 1;
+    const int delta_err = delta_x + 1;
 
-    // Когда начальное значение ошибки начинается не с 0, а с delta_err/2,
-    // отрезок получается красивее.
     int error = delta_err / 2;
 
     for (Point p = from; p.y <= to.y; ++p.y) {
         SetPixel(bmp, {p.x, p.y}, color);
-        // assert((p.y != to.y) || (p.x == to.x));
+        error += delta_err;
 
-        error += delta_err;  // Накапливаем ошибку вычисления координаты X.
-
-        if (error >= error_threshold) {  // Если вышли за пределы текущей координаты X
-            p.x += step_x;  // Смещаемся к следующей координате X
-            error -= error_threshold;  // Сбрасываем ошибку
+        if (error >= error_threshold) {
+            p.x += step_x;
+            error -= error_threshold;
         }
     }
 }
 
 /**
- * Рисует пологий отрезок (для которого |to.y - from.x| >= |to.y - from.y|).
+ * Draw slope line (for case  |to.x - from.x| >= |to.y - from.y|).
  */
-inline void DrawSlopeLine(BMP& bmp,Point from, Point to, BMPColorHeader color) {
+inline void DrawSlopeLine(BMP& bmp, Point& from, Point& to, BMPColorHeader& color) {
     const int delta_x = std::abs(to.x - from.x);
     const int delta_y = std::abs(to.y - from.y);
 
-    // assert(delta_x >= delta_y);
-
-    if (from.x > to.x) {  // Пологие отрезки рисуем слева направо.
+    if (from.x > to.x) {
         std::swap(from, to);
     }
-
-    // Пологие отрезки рисуются по аналогии с крутыми.
 
     const int step_y = Sign(to.y - from.y);
     const int error_threshold = delta_x + 1;
@@ -90,8 +74,6 @@ inline void DrawSlopeLine(BMP& bmp,Point from, Point to, BMPColorHeader color) {
 
     for (Point p = from; p.x <= to.x; ++p.x) {
         SetPixel(bmp, {p.x, p.y}, color);
-        // assert((p.x != to.x) || (p.y == to.y));
-
         error += delta_err;
 
         if (error >= error_threshold) {
@@ -101,20 +83,20 @@ inline void DrawSlopeLine(BMP& bmp,Point from, Point to, BMPColorHeader color) {
     }
 }
 
-// }  // namespace detail
+}  // namespace detail
 
 /**
- * Рисует отрезок прямой линии между точками from и to цветом color на изображении Image.
+ * Draw line between points from and to with color
  *
- * Для рисования используется алгоритм Брезенхэма.
+ * Using Bresenham's line algorithm
  */
-inline void DrawLine(BMP& bmp, Point from, Point to, BMPColorHeader color) {
+inline void DrawLine(BMP& bmp, Point& from, Point& to, BMPColorHeader& color) {
     const int delta_x = std::abs(to.x - from.x);
     const int delta_y = std::abs(to.y - from.y);
 
-    if (delta_y > delta_x) {  // Отрезок крутой.
-        DrawSteepLine(bmp, from, to, color);
-    } else {  // Отрезок пологий.
-        DrawSlopeLine(bmp, from, to, color);
+    if (delta_y > delta_x) {
+        detail::DrawSteepLine(bmp, from, to, color);
+    } else {
+        detail::DrawSlopeLine(bmp, from, to, color);
     }
 }
