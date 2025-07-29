@@ -1,17 +1,14 @@
 #pragma once
 #include <cstdint>
-// #include <fstream>
-// #include <iostream>
 #include <vector>
-// #include <stdexcept>
 #include <string>
 
 struct Point {
-    uint32_t x = 0;
-    uint32_t y = 0;
+    int32_t x = 0;
+    int32_t y = 0;
 };
 
-
+namespace bmp {
 #pragma pack(push, 1)
 struct BMPFileHeader {
     uint16_t file_type{ 0x4D42 };
@@ -52,29 +49,21 @@ class BMP {
     BMPInfoHeader bmp_info_header_;
     BMPColorHeader bmp_color_header_;
     std::vector<uint8_t> data_;
-
     uint32_t row_stride_{ 0 };
 
-    void WriteHeaders(std::ofstream &of);
-    void WriteHeadersAndData(std::ofstream &of);
-
-    // Add 1 to the row_stride until it is divisible with align_stride
+    void WriteHeaders(std::ofstream &outf);
+    void WriteHeadersAndData(std::ofstream &outf);
     uint32_t MakeStrideAligned(uint32_t align_stride);
     void CheckColorHeader(BMPColorHeader &bmp_color_header);
- public:
-    BMP(const std::string fname);
-    void DrawCross();
-    void Read(const std::string& fname);
-    void WriteInTerminal();
-    void WriteInFile(const std::string& fname);
-    void SetPixel(const Point& p, const BMPColorHeader& colour);
 
-    
-    // int32_t GetWidth() const;
-    // uint16_t GetBitCount() const;
-    // std::vector<uint8_t> GetData();
+ public:
+    BMP(const std::string file_name);
+    void DrawCross();
+    void Read(const std::string& file_name);
+    void WriteInTerminal();
+    void WriteInFile(const std::string& file_name);
+    void SetPixel(const Point& point, const BMPColorHeader& colour);
 };
 
-
-// namespace detail {
+} // namespace bmp
 
